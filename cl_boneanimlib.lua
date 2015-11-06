@@ -116,6 +116,9 @@ local function DoCurrentFrame(tGestureTable, tFrameData, iCurFrame, pl, fAmount,
 
 		local vCurBonePos, aCurBoneAng = mBoneMatrix:GetTranslation(), mBoneMatrix:GetAngles()
 		if not tBoneInfo.Callback or not tBoneInfo.Callback(pl, mBoneMatrix, iBoneID, vCurBonePos, aCurBoneAng, fFrameDelta, fPower) then
+			local vUp = aCurBoneAng:Up()
+			local vRight = aCurBoneAng:Right()
+			local vForward = aCurBoneAng:Forward()
 			local iInterp = tGestureTable.Interpolation
 
 			if iInterp == INTERP_LINEAR or bNoInterp then
