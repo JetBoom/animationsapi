@@ -250,7 +250,7 @@ function meta:ResetLuaAnimation(sAnimation, fDieTime, fPower, fTimeScale)
 		self.LuaAnimations[sAnimation] = {Frame = animtable.StartFrame or 1, FrameDelta = animtable.Type == TYPE_POSTURE and not animtable.TimeToArrive and 1 or 0, FrameData = animtable.FrameData,
 		TimeScale = fTimeScale or animtable.TimeScale or 1, Type = animtable.Type, RestartFrame = animtable.RestartFrame, TimeToArrive = animtable.TimeToArrive, Callback = animtable.Callback,
 		ShouldPlay = animtable.ShouldPlay, PreCallback = animtable.PreCallback, Power = fPower or animtable.Power or 1, DieTime = fDieTime or animtable.DieTime, Group = animtable.Group,
-		UseReferencePose = animtable.UseReferencePose}
+		UseReferencePose = animtable.UseReferencePose, Interpolation = animtable.Interpolation}
 
 		self:ResetLuaAnimationProperties()
 	end
