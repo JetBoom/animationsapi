@@ -83,6 +83,10 @@ local function AdvanceFrame(tGestureTable, tFrameData)
 	return false
 end
 
+local function LinearInterpolation(y1, y2, mu)
+	return y1 * (1 - mu) + y2 * mu
+end
+
 local function CosineInterpolation(y1, y2, mu)
 	local mu2 = (1 - math.cos(mu * math.pi)) / 2
 	return y1 * (1 - mu2) + y2 * mu2
@@ -122,18 +126,19 @@ local function DoCurrentFrame(tGestureTable, tFrameData, iCurFrame, pl, fAmount,
 			local iInterp = tGestureTable.Interpolation
 
 			if iInterp == INTERP_LINEAR or bNoInterp then
-				mBoneMatrix:Translate((tBoneInfo.MU * vUp + tBoneInfo.MR * vRight + tBoneInfo.MF * vForward) * fAmount)
-				mBoneMatrix:Rotate(Angle(tBoneInfo.RR, tBoneInfo.RU, tBoneInfo.RF) * fAmount)
+				local bi1 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame - 1, iBoneID)
+				mBoneMatrix:Translate(LinearInterpolation(bi1.MU * vUp + bi1.MR * vRight + bi1.MF * vForward, tBoneInfo.MU * vUp + tBoneInfo.MR * vRight + tBoneInfo.MF * vForward, fFrameDelta) * fPower)
+				mBoneMatrix:Rotate(LinearInterpolation(Angle(bi1.RR, bi1.RU, bi1.RF), Angle(tBoneInfo.RR, tBoneInfo.RU, tBoneInfo.RF), fFrameDelta) * fPower)
 			elseif iInterp == INTERP_CUBIC and tGestureTable.FrameData[iCurFrame - 2] and tGestureTable.FrameData[iCurFrame + 1] then
-					local bi0 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame - 2, iBoneID)
-					local bi1 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame - 1, iBoneID)
-					local bi3 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame + 1, iBoneID)
-					mBoneMatrix:Translate(CosineInterpolation(bi1.MU * vUp + bi1.MR * vRight + bi1.MF * vForward, tBoneInfo.MU * vUp + tBoneInfo.MR * vRight + tBoneInfo.MF * vForward, fFrameDelta) * fPower)
-					mBoneMatrix:Rotate(CubicInterpolation(Angle(bi0.RR, bi0.RU, bi0.RF),
-															Angle(bi1.RR, bi1.RU, bi1.RF),
-															Angle(tBoneInfo.RR, tBoneInfo.RU, tBoneInfo.RF),
-															Angle(bi3.RR, bi3.RU, bi3.RF),
-															fFrameDelta) * fPower)
+				local bi0 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame - 2, iBoneID)
+				local bi1 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame - 1, iBoneID)
+				local bi3 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame + 1, iBoneID)
+				mBoneMatrix:Translate(CosineInterpolation(bi1.MU * vUp + bi1.MR * vRight + bi1.MF * vForward, tBoneInfo.MU * vUp + tBoneInfo.MR * vRight + tBoneInfo.MF * vForward, fFrameDelta) * fPower)
+				mBoneMatrix:Rotate(CubicInterpolation(Angle(bi0.RR, bi0.RU, bi0.RF),
+									Angle(bi1.RR, bi1.RU, bi1.RF),
+									Angle(tBoneInfo.RR, tBoneInfo.RU, tBoneInfo.RF),
+									Angle(bi3.RR, bi3.RU, bi3.RF),
+									fFrameDelta) * fPower)
 			else -- Default is Cosine
 				local bi1 = GetFrameBoneInfo(pl, tGestureTable, iCurFrame - 1, iBoneID)
 				mBoneMatrix:Translate(CosineInterpolation(bi1.MU * vUp + bi1.MR * vRight + bi1.MF * vForward, tBoneInfo.MU * vUp + tBoneInfo.MR * vRight + tBoneInfo.MF * vForward, fFrameDelta) * fPower)
